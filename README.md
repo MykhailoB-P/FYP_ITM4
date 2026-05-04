@@ -1,4 +1,5 @@
 # SecuLab 🛡️
+
 **Cybersecurity Training Platform**
 
 SecuLab is a web platform for learning cybersecurity. Instead of just reading theory, students can practice hacking and defending in safe, interactive scenarios right in their browser.
@@ -19,24 +20,28 @@ SecuLab is a web platform for learning cybersecurity. Instead of just reading th
 ## 🛠️ Getting Started
 
 ### What you need
+
 - Node.js 18 or newer
 - A Supabase Project (with Database and Auth turned on)
 
 ### Installation
 
 1. **Download the code**
+
    ```bash
    git clone <your-repo-url>
    cd <your-project-folder>
    ```
 
 2. **Install packages**
+
    ```bash
    npm install
    ```
 
 3. **Set up database keys**
    Create a `.env.local` file in the main folder and add your Supabase keys:
+
    ```env
    NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
@@ -49,4 +54,5 @@ SecuLab is a web platform for learning cybersecurity. Instead of just reading th
    Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## 🎓 About This Project
-This is a Final Year College Project. It shows how to build a modern React web app with a real-time database, interactive learning mechanics, and a unique custom design.
+
+This is a Final Year College Project. It shows my expression of idea of cybersecurity education platform
