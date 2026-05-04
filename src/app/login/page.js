@@ -70,7 +70,7 @@ export default function LoginPage() {
 
         if (!result.error && result.data?.user) {
           const { error: insertError } = await supabase.from('users').insert([
-            { id: result.data.user.id, username: operatorId.trim(), xp_score: 0, cleared_scenarios: [] }
+            { id: result.data.user.id, username: operatorId.trim(), xp_score: 0, completed_modules: [] }
           ]);
           
           if (insertError) {
@@ -104,13 +104,12 @@ export default function LoginPage() {
           if (!userRecord && !fetchError) {
             const defaultUsername = result.data.user.email.split('@')[0];
             await supabase.from('users').insert([
-              { id: result.data.user.id, username: defaultUsername, xp_score: 0, cleared_scenarios: [] }
+              { id: result.data.user.id, username: defaultUsername, xp_score: 0, completed_modules: [] }
             ]);
           }
         }
-
+        window.dispatchEvent(new Event('auth-change'));
         router.push("/");
-        router.refresh();
       }
     } catch (err) {
       setError("AN UNEXPECTED ERROR OCCURRED.");

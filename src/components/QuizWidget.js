@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
+import { createClient } from "@/utils/supabase/client";
 
 const MOD_00_QUESTIONS = [
   {
@@ -36,6 +36,86 @@ const MOD_00_QUESTIONS = [
   }
 ];
 
+const MOD_01_QUESTIONS = [
+  {
+    question: "Which OSI layer is responsible for logical addressing (e.g., IP Addresses)?",
+    options: ["Layer 2 - Data Link", "Layer 3 - Network", "Layer 4 - Transport", "Layer 7 - Application"],
+    correctAnswer: 1,
+  },
+  {
+    question: "What port does HTTPS operate on?",
+    options: ["80", "22", "443", "53"],
+    correctAnswer: 2,
+  },
+  {
+    question: "Which protocol translates Layer 3 IP addresses into Layer 2 MAC addresses?",
+    options: ["DNS", "DHCP", "ARP", "TCP"],
+    correctAnswer: 2,
+  }
+];
+
+const MOD_02_QUESTIONS = [
+  {
+    question: "What psychological trigger is commonly exploited in phishing by impersonating a CEO?",
+    options: ["Curiosity", "Authority", "Fear", "Greed"],
+    correctAnswer: 1,
+  },
+  {
+    question: "What is Typosquatting?",
+    options: ["Injecting SQL into a login field", "Registering domains that look visually identical to legitimate ones", "Sending millions of ping requests", "Guessing passwords using a dictionary"],
+    correctAnswer: 1,
+  },
+  {
+    question: "Which email header reveals the actual IP addresses of the mail servers that relayed the message?",
+    options: ["From", "Return-Path", "Received", "Subject"],
+    correctAnswer: 2,
+  }
+];
+
+const MOD_03_QUESTIONS = [
+  {
+    question: "What is the primary difference between DoS and DDoS?",
+    options: ["DoS uses TCP, DDoS uses UDP", "DDoS uses multiple compromised systems (botnet), DoS uses one", "DoS is for websites, DDoS is for networks", "There is no difference"],
+    correctAnswer: 1,
+  },
+  {
+    question: "What is the correct sequence for a TCP 3-Way Handshake?",
+    options: ["SYN, ACK, SYN-ACK", "ACK, SYN, SYN-ACK", "SYN, SYN-ACK, ACK", "SYN-ACK, SYN, ACK"],
+    correctAnswer: 2,
+  },
+  {
+    question: "How can a server mitigate a SYN Flood attack?",
+    options: ["By using SYN Cookies", "By blocking all incoming traffic", "By disabling the firewall", "By using a weaker encryption key"],
+    correctAnswer: 0,
+  }
+];
+
+const MOD_04_QUESTIONS = [
+  {
+    question: "What is the primary difference between hashing and encryption?",
+    options: ["Hashing is for files, encryption is for text", "Hashing is a one-way function, encryption is two-way", "Encryption is faster than hashing", "Hashing uses two keys, encryption uses one"],
+    correctAnswer: 1,
+  },
+  {
+    question: "What is the purpose of adding a 'Salt' to a password before hashing?",
+    options: ["To make it taste better", "To make it easier to decrypt", "To ensure identical passwords have different hashes, defeating Rainbow Tables", "To compress the password size"],
+    correctAnswer: 2,
+  }
+];
+
+const MOD_05_QUESTIONS = [
+  {
+    question: "What does SQL Injection (SQLi) exploit?",
+    options: ["Weak WiFi passwords", "Improper input validation in database queries", "Unencrypted network traffic", "Outdated antivirus software"],
+    correctAnswer: 1,
+  },
+  {
+    question: "What is Cross-Site Scripting (XSS)?",
+    options: ["Injecting malicious client-side JavaScript into web pages", "Stealing a database file via FTP", "Guessing admin passwords", "Sending too many requests to crash a server"],
+    correctAnswer: 0,
+  }
+];
+
 export default function QuizWidget({ moduleId }) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -46,10 +126,7 @@ export default function QuizWidget({ moduleId }) {
   const [submitting, setSubmitting] = useState(false);
   const [userId, setUserId] = useState(null);
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  );
+  const supabase = createClient();
 
   const baseModuleId = moduleId.replace('_QUIZ', '');
 
@@ -65,12 +142,12 @@ export default function QuizWidget({ moduleId }) {
 
         const { data, error } = await supabase
           .from("users")
-          .select("cleared_modules")
+          .select("completed_modules")
           .eq("id", user.id)
           .single();
 
-        if (data && data.cleared_modules) {
-          if (data.cleared_modules.includes(baseModuleId)) {
+        if (data && data.completed_modules) {
+          if (data.completed_modules.includes(baseModuleId)) {
             setIsAlreadyCleared(true);
           }
         }
@@ -84,7 +161,13 @@ export default function QuizWidget({ moduleId }) {
     checkStatus();
   }, [baseModuleId, supabase]);
 
-  const questions = baseModuleId === "MOD_00" ? MOD_00_QUESTIONS : [];
+  let questions = [];
+  if (baseModuleId === "MOD_00") questions = MOD_00_QUESTIONS;
+  else if (baseModuleId === "MOD_01") questions = MOD_01_QUESTIONS;
+  else if (baseModuleId === "MOD_02") questions = MOD_02_QUESTIONS;
+  else if (baseModuleId === "MOD_03") questions = MOD_03_QUESTIONS;
+  else if (baseModuleId === "MOD_04") questions = MOD_04_QUESTIONS;
+  else if (baseModuleId === "MOD_05") questions = MOD_05_QUESTIONS;
 
   if (loading) {
     return (
@@ -121,7 +204,7 @@ export default function QuizWidget({ moduleId }) {
         
         {isPerfect ? (
           <p className="text-success font-bold text-xl uppercase animate-pulse mb-6">
-            Module Cleared. +50 XP Awarded.
+            Module Cleared. +25 XP Awarded.
           </p>
         ) : (
           <div className="mb-6">
@@ -168,7 +251,13 @@ export default function QuizWidget({ moduleId }) {
     } else {
       // Finished
       setIsCompleted(true);
-      const isPerfect = (score + (selectedAnswers[currentQuestionIndex] === currentQ.correctAnswer ? 1 : 0)) === questions.length;
+      
+      const computedScore = questions.reduce((total, q, idx) => {
+        return total + (selectedAnswers[idx] === q.correctAnswer ? 1 : 0);
+      }, 0);
+      setScore(computedScore);
+      
+      const isPerfect = computedScore === questions.length;
       
       if (isPerfect && userId) {
         setSubmitting(true);
@@ -176,18 +265,21 @@ export default function QuizWidget({ moduleId }) {
           // get current user row to append array and add XP
           const { data: userData } = await supabase
             .from("users")
-            .select("xp_score, cleared_modules")
+            .select("xp_score, completed_modules")
             .eq("id", userId)
             .single();
             
           const currentXp = userData?.xp_score || 0;
-          const currentModules = userData?.cleared_modules || [];
+          const currentModules = userData?.completed_modules || [];
           
           if (!currentModules.includes(baseModuleId)) {
             await supabase.from("users").update({
-              xp_score: currentXp + 50,
-              cleared_modules: [...currentModules, baseModuleId]
+              xp_score: currentXp + 25,
+              completed_modules: [...currentModules, baseModuleId]
             }).eq("id", userId);
+            
+            // Dispatch event so Navbar updates instantly
+            window.dispatchEvent(new Event('gamification-update'));
           }
         } catch (err) {
           console.error("Failed to update XP:", err);

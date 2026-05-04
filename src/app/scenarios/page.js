@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+import { createClient } from "@/utils/supabase/client";
 
 const beginningScenarios = [
   {
@@ -10,7 +11,8 @@ const beginningScenarios = [
     title: "INTRO: NAVIGATING SECU-OS",
     description: "Learn the basic commands and navigation techniques used within the SecuLab environment.",
     icon: "🖥️",
-    xp: 50
+    xp: 50,
+    path: "/scenarios/intro-os"
   },
   {
     id: "beg-2",
@@ -18,7 +20,8 @@ const beginningScenarios = [
     title: "OSINT: PUBLIC FOOTPRINT",
     description: "Gather publicly available information about a target organization using passive reconnaissance tools.",
     icon: "👁️",
-    xp: 50
+    xp: 50,
+    path: "/scenarios/osint-footprint"
   },
   {
     id: "beg-3",
@@ -26,7 +29,8 @@ const beginningScenarios = [
     title: "PHISHING: EMAIL ANALYSIS",
     description: "Inspect email headers and content to identify indicators of a phishing attempt.",
     icon: "🎣",
-    xp: 50
+    xp: 50,
+    path: "/scenarios/phishing-analysis"
   }
 ];
 
@@ -55,7 +59,8 @@ const intermediateScenarios = [
     title: "SYS: BRUTE FORCE",
     description: "Attempt multiple password combinations against an authentication endpoint to gain unauthorized access.",
     icon: "🔓",
-    xp: 150
+    xp: 150,
+    path: "/scenarios/brute-force-ui"
   },
   {
     id: "4",
@@ -86,15 +91,35 @@ const intermediateScenarios = [
 const advancedScenarios = [];
 
 export default function ScenariosPage() {
-  const [activeTab, setActiveTab] = useState("Intermediate");
+  const [activeTab, setActiveTab] = useState(null);
+  const [completedModules, setCompletedModules] = useState([]);
+  
+  const supabase = createClient();
 
+  useEffect(() => {
+    const fetchUserProgress = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase
+          .from("users")
+          .select("completed_modules")
+          .eq("id", user.id)
+          .single();
+          
+        if (data && data.completed_modules) {
+          setCompletedModules(data.completed_modules);
+        }
+      }
+    };
+    fetchUserProgress();
+  }, [supabase]);
 
   const tabs = ["Beginning", "Intermediate", "Advanced"];
 
   let activeScenarios = [];
   if (activeTab === "Beginning") activeScenarios = beginningScenarios;
-  if (activeTab === "Intermediate") activeScenarios = intermediateScenarios;
-  if (activeTab === "Advanced") activeScenarios = advancedScenarios;
+  else if (activeTab === "Intermediate") activeScenarios = intermediateScenarios;
+  else if (activeTab === "Advanced") activeScenarios = advancedScenarios;
 
   return (
     <div className="flex-1 p-8 md:p-16 max-w-7xl mx-auto w-full min-h-screen">
@@ -109,15 +134,15 @@ export default function ScenariosPage() {
       </div>
 
       {/* Tabs Layout */}
-      <div className="flex mb-8 border-b-4 border-black gap-2 overflow-x-auto">
+      <div className="flex border-b-4 border-black gap-2 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`font-black uppercase text-xl px-8 py-4 border-t-4 border-l-4 border-r-4 border-black transition-colors whitespace-nowrap ${
+            onClick={() => setActiveTab(activeTab === tab ? null : tab)}
+            className={`font-black uppercase text-xl px-8 py-4 border-t-4 border-l-4 border-r-4 border-black transition-all whitespace-nowrap ${
               activeTab === tab 
                 ? "bg-black text-white shadow-[4px_0px_0px_#000000]" 
-                : "bg-white text-gray-500 hover:text-black hover:bg-gray-100"
+                : "bg-white text-gray-500 hover:text-black hover:bg-gray-100 hover:-translate-y-1"
             }`}
           >
             {tab}
@@ -125,63 +150,90 @@ export default function ScenariosPage() {
         ))}
       </div>
 
-      {activeScenarios.length === 0 ? (
-        <div className="border-4 border-black bg-gray-100 p-16 text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-          <h2 className="text-3xl font-black uppercase mb-4 text-gray-500">[ FOLDER EMPTY ]</h2>
-          <p className="font-mono text-xl text-gray-500">Modules for this difficulty level are currently under construction.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {activeScenarios.map((scenario) => {
-            return (
-              <div 
-                key={scenario.id} 
-                className="flex flex-col border-2 border-black p-6 transition-transform duration-200 bg-white shadow-brutal hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000000]"
-              >
-                {/* Top row: Icon and Tag */}
-                <div className="flex justify-between items-start mb-6">
-                  <div className="w-12 h-12 flex items-center justify-center text-2xl border-2 border-black bg-black text-white">
-                    {scenario.icon}
-                  </div>
-                  <div className="flex gap-2">
-                    <span className="font-mono text-sm font-bold bg-[#00FF00] text-black border-2 border-black px-2 py-1 uppercase shadow-[2px_2px_0px_#000000]">
-                      +{scenario.xp} XP
-                    </span>
-                    <span className="font-mono text-sm font-bold bg-white text-black border-2 border-black px-2 py-1 uppercase shadow-[2px_2px_0px_#000000]">
-                      {scenario.tag}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Title & Description */}
-                <div className="flex-1 mb-8">
-                  <h2 className="text-2xl font-black uppercase mb-3 leading-tight tracking-tight">
-                    {scenario.title}
-                  </h2>
-                  <p className="text-base leading-relaxed font-medium">
-                    {scenario.description}
-                  </p>
-                </div>
-
-                {/* Terminal Button */}
-                {scenario.path ? (
-                  <Link href={scenario.path} className="w-full">
-                    <button className="w-full font-mono font-bold text-sm py-3 px-4 uppercase tracking-widest border-2 border-black transition-colors text-left flex items-center bg-black text-white hover:bg-success hover:text-black">
-                      <span className="text-success font-black mr-2 hover:text-black">{">_"}</span> 
-                      LAUNCH SIMULATION
-                    </button>
-                  </Link>
-                ) : (
-                  <button className="w-full font-mono font-bold text-sm py-3 px-4 uppercase tracking-widest border-2 border-black transition-colors text-left flex items-center bg-black text-white hover:bg-success hover:text-black">
-                    <span className="text-success font-black mr-2 hover:text-black">{">_"}</span> 
-                    LAUNCH SIMULATION
-                  </button>
-                )}
+      <div className={`grid transition-[grid-template-rows,opacity,margin] duration-500 ease-in-out ${activeTab ? 'grid-rows-[1fr] opacity-100 mb-8 mt-8' : 'grid-rows-[0fr] opacity-0 mb-0 mt-0'}`}>
+        <div className="overflow-hidden">
+          {activeTab && (
+            activeScenarios.length === 0 ? (
+              <div className="border-4 border-black bg-gray-100 p-16 text-center shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+                <h2 className="text-3xl font-black uppercase mb-4 text-gray-500">[ FOLDER EMPTY ]</h2>
+                <p className="font-mono text-xl text-gray-500">Modules for this difficulty level are currently under construction.</p>
               </div>
-            );
-          })}
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 py-2">
+                {activeScenarios.map((scenario) => {
+                  const isCompleted = completedModules.includes(scenario.id);
+                  return (
+                    <div 
+                      key={scenario.id} 
+                      className={`flex flex-col border-2 p-6 transition-transform duration-200 shadow-[4px_4px_0px_#000000] hover:-translate-y-1 hover:shadow-[6px_6px_0px_#000000] ${
+                        isCompleted ? "bg-[#e0ffe0] border-[#00FF00]" : "bg-white border-black"
+                      }`}
+                    >
+                      {/* Top row: Icon and Tag */}
+                      <div className="flex justify-between items-start mb-6">
+                        <div className={`w-12 h-12 flex items-center justify-center text-2xl border-2 border-black ${isCompleted ? "bg-[#00FF00] text-black" : "bg-black text-white"}`}>
+                          {isCompleted ? "✅" : scenario.icon}
+                        </div>
+                        <div className="flex gap-2">
+                          <span className="font-mono text-sm font-bold bg-[#00FF00] text-black border-2 border-black px-2 py-1 uppercase shadow-[2px_2px_0px_#000000]">
+                            +{scenario.xp} XP
+                          </span>
+                          <span className="font-mono text-sm font-bold bg-white text-black border-2 border-black px-2 py-1 uppercase shadow-[2px_2px_0px_#000000]">
+                            {scenario.tag}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Title & Description */}
+                      <div className="flex-1 mb-8">
+                        <h2 className="text-2xl font-black uppercase mb-3 leading-tight tracking-tight">
+                          {scenario.title}
+                        </h2>
+                        <p className="text-base leading-relaxed font-medium">
+                          {scenario.description}
+                        </p>
+                      </div>
+
+                      {/* Terminal Button */}
+                      {scenario.path ? (
+                        <Link href={scenario.path} className="w-full">
+                          <button className="w-full font-mono font-bold text-sm py-3 px-4 uppercase tracking-widest border-2 border-black transition-colors text-left flex items-center bg-black text-white hover:bg-success hover:text-black">
+                            <span className="text-success font-black mr-2 hover:text-black">{">_"}</span> 
+                            LAUNCH SIMULATION
+                          </button>
+                        </Link>
+                      ) : (
+                        <button className="w-full font-mono font-bold text-sm py-3 px-4 uppercase tracking-widest border-2 border-black transition-colors text-left flex items-center bg-black text-white hover:bg-success hover:text-black">
+                          <span className="text-success font-black mr-2 hover:text-black">{">_"}</span> 
+                          LAUNCH SIMULATION
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )
+          )}
         </div>
-      )}
+      </div>
+
+      <div className={`border-4 border-black bg-white p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] transition-transform duration-500 ${!activeTab ? 'mt-8' : ''}`}>
+        <h2 className="text-2xl font-black uppercase mb-6 border-b-2 border-black pb-2">[ MODULE OVERVIEW ]</h2>
+        <ul className="space-y-6 font-mono text-lg font-medium">
+          <li className="flex flex-col md:flex-row gap-4 md:items-start">
+            <strong className="bg-black text-white px-4 py-2 uppercase border-2 border-black whitespace-nowrap shadow-[4px_4px_0px_#000000]">Beginning</strong>
+            <span className="pt-2">Fundamental training for novice operators. Learn navigation, Open Source Intelligence (OSINT) basics, and fundamental threat analysis.</span>
+          </li>
+          <li className="flex flex-col md:flex-row gap-4 md:items-start">
+            <strong className="bg-black text-white px-4 py-2 uppercase border-2 border-black whitespace-nowrap shadow-[4px_4px_0px_#000000]">Intermediate</strong>
+            <span className="pt-2">Tactical operations. Hands-on experience with port scanning, injection exploitation, and authentication bypass. Requires basic network and database knowledge.</span>
+          </li>
+          <li className="flex flex-col md:flex-row gap-4 md:items-start">
+            <strong className="bg-black text-white px-4 py-2 uppercase border-2 border-black whitespace-nowrap shadow-[4px_4px_0px_#000000]">Advanced</strong>
+            <span className="pt-2">Complex 0-day level system exploitation simulations. Access restricted to elite operators with high-level clearance. (Under Construction)</span>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

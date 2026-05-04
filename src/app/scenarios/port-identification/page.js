@@ -9,6 +9,7 @@ export default function PortIdentificationScenario() {
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalLog, setTerminalLog] = useState(["SecuOS v1.4. Type 'help' for available commands."]);
   const [isCleared, setIsCleared] = useState(false);
+  const [isFailed, setIsFailed] = useState(false);
   const [showHint, setShowHint] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
@@ -25,7 +26,7 @@ export default function PortIdentificationScenario() {
 
   const handleCommandSubmit = (e) => {
     e.preventDefault();
-    if (!terminalInput.trim() || isScanning || isCleared) return;
+    if (!terminalInput.trim() || isScanning || isCleared || isFailed) return;
 
     const rawCmd = terminalInput.trim();
     const cmd = rawCmd.replace(/\s+/g, ' '); // normalize spaces
@@ -71,7 +72,7 @@ export default function PortIdentificationScenario() {
       }, 500);
     } else {
       setTimeout(() => {
-        setTerminalLog((prev) => [...prev, "Port secure. Encryption verified. Target another port."]);
+        setIsFailed(true);
       }, 500);
     }
   };
@@ -149,7 +150,27 @@ export default function PortIdentificationScenario() {
 
         {/* Right Column (HUD) */}
         <div className="w-full lg:w-[450px] flex flex-col gap-6">
-          {isCleared ? (
+          {isFailed ? (
+            <div className="border-2 border-black bg-[#FF0000] text-white p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center text-center h-full">
+              <h2 className="text-4xl font-black uppercase tracking-widest mb-8">
+                [ CRITICAL FAILURE ]
+              </h2>
+              <div className="font-mono text-xl font-bold mb-8 space-y-2">
+                <p>SYSTEM GOT HACKED.</p>
+                <p>DATA LEAKAGE DETECTED.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setIsFailed(false);
+                  setTerminalLog(["SecuOS v1.4. Type 'help' for available commands."]);
+                  setTerminalInput("");
+                }}
+                className="w-full py-6 px-4 font-black text-xl uppercase tracking-widest bg-black text-white border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-white hover:text-black active:translate-x-1 active:translate-y-1 active:shadow-none transition-transform"
+              >
+                [ TRY AGAIN ]
+              </button>
+            </div>
+          ) : isCleared ? (
              <div className="border-2 border-black bg-[#00FF00] p-8 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex flex-col items-center justify-center text-center h-full">
                <h2 className="text-4xl font-black uppercase tracking-widest mb-8">
                  [ MISSION ACCOMPLISHED ]
@@ -160,7 +181,7 @@ export default function PortIdentificationScenario() {
                </div>
                <button
                  onClick={async () => {
-                   await processScenarioClear('PORT_IDENTIFICATION', 100);
+                   await processScenarioClear('1', 100);
                    router.push("/scenarios");
                  }}
                  disabled={isSyncing}
@@ -192,7 +213,7 @@ export default function PortIdentificationScenario() {
                   onClick={() => setShowHint(!showHint)}
                   className="w-full bg-black text-white font-bold py-4 px-6 uppercase tracking-widest border-2 border-transparent hover:bg-white hover:text-black hover:border-black transition-colors mb-4"
                 >
-                  [ ? REQUEST INTEL ]
+                  [ ? HINT ]
                 </button>
 
                 <button
@@ -206,7 +227,7 @@ export default function PortIdentificationScenario() {
                   <div className="mt-6 p-4 border-2 border-black bg-gray-100 font-mono text-sm leading-relaxed">
                     <strong>HINT:</strong> Before exploiting a system, you need to see what doors are open. The tool <code>nmap</code> (Network Mapper) is available in your terminal. Try scanning the target IP by typing:
                     <br/><br/>
-                    <code className="bg-black text-[#00FF00] px-2 py-1">nmap 192.168.1.105</code>
+                    <code className="bg-black text-[#00FF00] px-2 py-1">nmap IP Address</code>
                     <br/><br/>
                     Reference: THEORY -&gt; 1.2 TCP/IP & Ports
                   </div>

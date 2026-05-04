@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# SecuLab 🛡️
+**Cybersecurity Training Platform**
 
-## Getting Started
+SecuLab is a web platform for learning cybersecurity. Instead of just reading theory, students can practice hacking and defending in safe, interactive scenarios right in their browser.
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Interactive Scenarios:** 6 playable hacking missions, including OSINT, Port Scanning, SQL Injection, Brute Force, and Phishing Analysis.
+- **XP & Gamification:** Users earn XP points when they answer quizzes or finish missions. The system remembers completed tasks to stop users from cheating for points.
+- **Live Leaderboard:** A ranking page that updates instantly without refreshing the page. It highlights your name so you can easily find your rank.
+- **Hacker Design:** A cool, minimalist "hacker" style. It features an animated cyber background and a clean black-and-white terminal look.
+- **Fast & Smooth:** The website updates your XP and profile instantly when you play, without needing to reload the page.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 💻 Tech Stack
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **Frontend:** Next.js, React, Tailwind CSS
+- **Backend:** Supabase (Database, Auth, and Real-time updates)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Getting Started
 
-## Learn More
+### What you need
+- Node.js 18 or newer
+- A Supabase Project (with Database and Auth turned on)
 
-To learn more about Next.js, take a look at the following resources:
+### Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **Download the code**
+   ```bash
+   git clone <your-repo-url>
+   cd <your-project-folder>
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+2. **Install packages**
+   ```bash
+   npm install
+   ```
 
-## Deploy on Vercel
+3. **Set up database keys**
+   Create a `.env.local` file in the main folder and add your Supabase keys:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-supabase-project-url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+   ```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+4. **Run the project**
+   ```bash
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🎓 About This Project
+This is a Final Year College Project. It shows how to build a modern React web app with a real-time database, interactive learning mechanics, and a unique custom design.

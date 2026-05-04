@@ -22,10 +22,10 @@ export function useGamification() {
 
       const userId = authData.user.id;
 
-      // 2. Fetch user's current xp_score from public.users
+      // 2. Fetch user's current data from public.users
       const { data: userData, error: fetchError } = await supabase
         .from('users')
-        .select('xp_score')
+        .select('xp_score, completed_modules')
         .eq('id', userId)
         .single();
 
@@ -33,13 +33,22 @@ export function useGamification() {
         throw new Error(`Error fetching user data: ${fetchError.message}`);
       }
       
+      const completedModules = userData?.completed_modules || [];
+      
+      // Prevent awarding XP if already completed
+      if (completedModules.includes(scenarioId)) {
+        console.log(`[GAMIFICATION] Scenario ${scenarioId} already completed. No XP awarded.`);
+        return;
+      }
+      
       const currentXp = userData?.xp_score || 0;
       const newXp = currentXp + xpReward;
+      const newCompletedModules = [...completedModules, scenarioId];
 
-      // 3. Update the xp_score
+      // 3. Update the xp_score and completed_modules
       const { error: updateError } = await supabase
         .from('users')
-        .update({ xp_score: newXp })
+        .update({ xp_score: newXp, completed_modules: newCompletedModules })
         .eq('id', userId);
 
       if (updateError) {
@@ -47,6 +56,7 @@ export function useGamification() {
       }
 
       console.log(`[GAMIFICATION] Successfully awarded ${xpReward} XP for scenario ${scenarioId}. New total: ${newXp} XP`);
+      window.dispatchEvent(new Event('gamification-update'));
 
     } catch (error) {
       // Robust try/catch error handling that logs errors clearly

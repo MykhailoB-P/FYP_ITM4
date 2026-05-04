@@ -3,15 +3,53 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
+import { useState, useEffect } from "react";
 
 export default function Navbar() {
   const router = useRouter();
   const supabase = createClient();
+  const [operatorName, setOperatorName] = useState("UNKNOWN");
+  const [xpScore, setXpScore] = useState(0);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("username, xp_score")
+          .eq("id", user.id)
+          .single();
+        
+        if (data && !error) {
+          setOperatorName(data.username);
+          setXpScore(data.xp_score);
+        }
+      } else {
+        setOperatorName("UNKNOWN");
+        setXpScore(0);
+      }
+    };
+    
+    fetchUserData();
+
+    // Listen for custom events to update state instantly
+    const handleUpdate = () => {
+      fetchUserData();
+    };
+    window.addEventListener('gamification-update', handleUpdate);
+    window.addEventListener('auth-change', handleUpdate);
+
+    return () => {
+      window.removeEventListener('gamification-update', handleUpdate);
+      window.removeEventListener('auth-change', handleUpdate);
+    };
+  }, [supabase]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    window.dispatchEvent(new Event('auth-change'));
     router.push("/login");
-    router.refresh();
   };
 
   return (
@@ -63,13 +101,25 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* LOGOUT BUTTON */}
-      <button 
-        onClick={handleLogout}
-        className="bg-black text-white px-6 py-2 font-bold font-mono tracking-widest uppercase border-2 border-black hover:bg-threat hover:text-black hover:shadow-brutal transition-all"
-      >
-        [ LOGOUT ]
-      </button>
+      {/* RIGHT SIDE: USER INFO & LOGOUT */}
+      <div className="flex items-center space-x-4">
+        <div className="hidden sm:flex flex-col items-end font-mono text-sm border-r-2 border-black pr-4">
+          <span className="font-bold uppercase text-black">
+            OP: {operatorName}
+          </span>
+          <span className="text-[#00FF00] bg-black px-2 mt-1 font-bold">
+            {xpScore} XP
+          </span>
+        </div>
+
+        {/* LOGOUT BUTTON */}
+        <button 
+          onClick={handleLogout}
+          className="bg-black text-white px-6 py-2 font-bold font-mono tracking-widest uppercase border-2 border-black hover:bg-threat hover:text-black hover:shadow-brutal transition-all"
+        >
+          [ LOGOUT ]
+        </button>
+      </div>
     </nav>
   );
 }

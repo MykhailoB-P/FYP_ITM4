@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createBrowserClient } from "@supabase/ssr";
+import { useGamification } from "@/hooks/useGamification";
 
 export default function SqlInjectionScenario() {
   const [username, setUsername] = useState("");
@@ -14,6 +14,7 @@ export default function SqlInjectionScenario() {
   const [hasError, setHasError] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const router = useRouter();
+  const { processScenarioClear, isSyncing } = useGamification();
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -65,10 +66,18 @@ export default function SqlInjectionScenario() {
             </div>
             
             <button
-              onClick={() => router.push("/scenarios")}
-              className="w-full bg-black text-white font-black text-2xl py-6 px-4 uppercase tracking-widest border-4 border-black hover:bg-white hover:text-black transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] active:translate-y-1 active:translate-x-1 active:shadow-none"
+              onClick={async () => {
+                await processScenarioClear("2", 100);
+                router.push("/scenarios");
+              }}
+              disabled={isSyncing}
+              className={`w-full font-black text-2xl py-6 px-4 uppercase tracking-widest border-4 border-black transition-colors shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] ${
+                isSyncing 
+                  ? 'bg-gray-400 text-gray-700 cursor-not-allowed opacity-70' 
+                  : 'bg-black text-white hover:bg-white hover:text-black active:translate-y-1 active:translate-x-1 active:shadow-none'
+              }`}
             >
-              [ &lt; EXIT TO LAB ]
+              {isSyncing ? '[ SYNCHRONIZING... ]' : '[ CLAIM XP & EXIT ]'}
             </button>
           </div>
         </div>
