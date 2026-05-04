@@ -1,3 +1,8 @@
+<div align="center">
+  <h2 style="color: #FF0000; font-weight: 900;">⚠️ EARLY PROTOTYPE BUILD ⚠️</h2>
+  <p style="color: #FF0000; font-weight: bold;">This is a proof-of-concept build created to demonstrate the core idea, mechanics, and design expression. It is not a final production release.</p>
+</div>
+
 # SecuLab 🛡️
 
 **Cybersecurity Training Platform**
