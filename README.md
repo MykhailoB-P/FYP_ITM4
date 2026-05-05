@@ -60,4 +60,4 @@ SecuLab is a web platform for learning cybersecurity. Instead of just reading th
 
 ## 🎓 About This Project
 
-This is a Final Year College Project. It shows my expression of idea of cybersecurity education platform
+This is a Final Year Project for the University. It shows my expression of the idea of a cybersecurity education platform
